@@ -1,48 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "core/base.html" %}
 
-    <title>{{ movie.name }} | Cinema</title>
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-
-<body class="bg-gray-950 text-white min-h-screen">
-
-    <!-- Header -->
-    <header class="bg-gray-900 border-b border-gray-800">
-        <div class="max-w-7xl mx-auto px-6 py-5">
-
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold">
-                        🎬 Cinema
-                    </h1>
-
-                    <p class="text-gray-400 mt-1">
-                        Choose a show and book your tickets
-                    </p>
-                </div>
-
-                <a
-                    href="{% url 'movie_list' %}"
-                    class="text-gray-400 hover:text-white transition"
-                >
-                    ← Back to Movies
-                </a>
-            </div>
-
-        </div>
-    </header>
-
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-10">
-
-
+{% block main_content %}
         <!-- Movie Details -->
         <section
             class="bg-gray-900 border border-gray-800 rounded-2xl
@@ -184,7 +142,9 @@
                                 </p>
 
                                 <p class="text-lg font-semibold">
-                                    {{ show.date|date:"D, M d, Y" }}
+                                    {{ show.show_time|date:"Y-m-d" }}
+                                    <br>
+                                    {{ show.show_time|timeuntil:from_date }} remaining
                                 </p>
 
                             </div>
@@ -201,7 +161,7 @@
                                 </p>
 
                                 <p class="text-3xl font-bold">
-                                    {{ show.time|time:"g:i A" }}
+                                    {{ show.show_time|time:"g:i A" }}
                                 </p>
 
                             </div>
@@ -234,7 +194,7 @@
 
                             <!-- Book Button -->
                             <a
-                                href="{% url 'book_ticket' show.id %}"
+                                href=""
                                 class="block w-full text-center
                                        bg-red-600 hover:bg-red-700
                                        active:bg-red-800
@@ -277,19 +237,4 @@
             {% endif %}
 
         </section>
-
-    </main>
-
-
-    <!-- Footer -->
-    <footer class="border-t border-gray-800 mt-16">
-        <div
-            class="max-w-7xl mx-auto px-6 py-6
-                   text-center text-gray-500 text-sm"
-        >
-            © {% now "Y" %} Cinema. All rights reserved.
-        </div>
-    </footer>
-
-</body>
-</html>
+{% endblock main_content %}
