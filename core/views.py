@@ -1,11 +1,36 @@
-from django.shortcuts import render, redirect
-from .models import Movie, Show
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Movie, Show, Reservation
 from django.utils import timezone
 from .forms import RegisterForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.db.models import Exists, OuterRef
 
+
+
+def hall_seats_view(request, show_id):
+    show = get_object_or_404(Show, pk=show_id)
+    # print(show.cinemahall.seat_set.all())
+    # print(show.cinemahall.seats.all())
+    seats = show.cinemahall.seats.annotate(
+        reserved=Exists(
+            Reservation.objects.filter(
+                seat=OuterRef("pk"),
+                show=show,
+                status__in=[
+                    Reservation.STATUS_CHOICES.confirmed,
+                    Reservation.STATUS_CHOICES.pending
+                ]
+            )
+        )
+    )
+    context = {
+        'show':show,
+        'seats':seats
+    }
+    return render(request, "core/hall_seats.html", context)
+    
 
 
 def home(request):
@@ -20,11 +45,10 @@ def home(request):
     return render(request, "core/home.html", context)
 
 
-@login_required
 def movie_detail(request, pk):
     movie = Movie.objects.get(pk=pk)
-    shows = Show.objects.filter(movie=movie)
-    # print(shows)
+    shows = Show.objects.filter(movie=movie, show_time__gt=timezone.now())
+    # print(shows[0].show_time, timezone.now())
     context = {
         'movie': movie,
         'shows': shows,
