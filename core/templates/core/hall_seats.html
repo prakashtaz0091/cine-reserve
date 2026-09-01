@@ -81,6 +81,7 @@
                 <button
                     type="button"
                     data-seat="{{ seat.name }}"
+                    data-seat-id="{{ seat.id }}"
                     data-price="{{ show.price }}"
                     
                     {% if seat.reserved %}disabled{% endif %}
@@ -181,23 +182,28 @@
         </p>
     </div>
 
-    <button
-        type="submit"
-        class="
-            w-full sm:w-auto
-            px-7 py-3
-            rounded-xl
-            bg-purple-600
-            hover:bg-purple-500
-            disabled:bg-gray-800
-            disabled:text-gray-500
-            text-white font-semibold
-            shadow-lg shadow-purple-500/20
-            transition
-        "
-    >
-        Continue to Checkout →
-    </button>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="show" id="show" value="{{show.id}}" />
+        <input type="hidden" name="seats" id="seats" />
+        <button
+            type="submit"
+            class="
+                w-full sm:w-auto
+                px-7 py-3
+                rounded-xl
+                bg-purple-600
+                hover:bg-purple-500
+                disabled:bg-gray-800
+                disabled:text-gray-500
+                text-white font-semibold
+                shadow-lg shadow-purple-500/20
+                transition
+            "
+        >
+            Continue to Checkout →
+        </button>
+    </form>
 </div>
 
 </div>
@@ -205,9 +211,12 @@
 <script>
     // Keep track of selected seats
     const selectedSeats = new Set();
+    const selectedSeatsId = new Set();
     let totalPrice = 0;
     const currencyLabel = "Rs. "
     const seatButtons = document.querySelectorAll(".seat-btn");
+    const seatsInput = document.getElementById("seats")
+    const showInput = document.getElementById("show")
 
     // Elements from the booking summary
     const selectedSeatsText = document.querySelector(
@@ -220,11 +229,13 @@
     seatButtons.forEach((seat) => {
         seat.addEventListener("click", () => {
             const seatName = seat.dataset.seat;
+            const seatId = seat.dataset.seatId;
             const seatPrice = parseInt(seat.dataset.price);
 
             if (selectedSeats.has(seatName)) {
                 // Deselect
                 selectedSeats.delete(seatName);
+                selectedSeatsId.delete(seatId);
 
                 seat.classList.remove(
                     "bg-purple-600",
@@ -241,6 +252,7 @@
             } else {
                 // Select
                 selectedSeats.add(seatName);
+                selectedSeatsId.add(seatId);
                 
                 seat.classList.remove(
                     "bg-gray-800",
@@ -263,6 +275,7 @@
 
     function updateSelection() {
         const seats = Array.from(selectedSeats);
+        const seatsId = Array.from(selectedSeatsId);
         totalPriceEl.innerText = `${currencyLabel} ${totalPrice}`;
 
         if (seats.length === 0) {
@@ -279,6 +292,7 @@
         );
 
         selectedSeatsText.textContent = seats.join(", ");
+        seatsInput.value = seatsId.join(",");
     }
 
 

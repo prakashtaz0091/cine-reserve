@@ -32,8 +32,12 @@ class Seat(models.Model):
     name = models.CharField(max_length=10)
     cinemahall = models.ForeignKey(CinemaHall, on_delete=models.CASCADE, related_name="seats")
     
+    
+    class Meta:
+        unique_together = ("name", "cinemahall")
+    
     def __str__(self):
-        return self.name 
+        return self.name
     
     
 class Show(models.Model):
