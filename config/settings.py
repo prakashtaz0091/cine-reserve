@@ -143,3 +143,5 @@ CELERY_TIMEZONE = "Asia/Kathmandu"
 # CELERY_ENABLE_UTC = True
 
 RESERVATION_WINDOW_TIME = 5 # minutes
+
+LOGIN_URL = 'login'

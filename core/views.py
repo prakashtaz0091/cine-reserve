@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Movie, Show, Reservation, Seat
+from .models import Movie, Show, Reservation, Seat, MasterReservation
 from django.utils import timezone
 from .forms import RegisterForm
 from django.contrib.auth.models import User
@@ -8,7 +8,54 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.db import IntegrityError, transaction
 from django.contrib import messages
+from django.conf import settings
+import requests
+import json
 
+
+
+def verify_reservation_payment(request):
+    data = request.GET 
+    pidx = data.get('pidx')
+    purchase_order_id = data.get('purchase_order_id')
+    try:
+        master = MasterReservation.objects.get(pidx=pidx, pk=purchase_order_id)
+    except MasterReservation.DoesNotExist:
+        print("Something went wrong. Master reservation doesn't exist")
+    except MasterReservation.MultipleObjectsReturned:
+        print("Duplicate pidx exists")
+        
+    url = "https://dev.khalti.com/api/v2/epayment/lookup/"
+    payload = json.dumps({
+            "pidx": pidx
+        })
+    
+    headers = {
+        'Authorization': 'key your-api-key',
+        'Content-Type': 'application/json',
+        }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    data_res = response.json()
+    if data_res.get('status') == 'Completed':
+        if int(data_res.get('total_amount')) == master.amount:  
+            with transaction.atomic():
+                master.transaction_id = data_res.get('transaction_id')
+                master.payment_status = 'Completed'
+                master.reservations.all().update(status=Reservation.STATUS_CHOICES.confirmed)
+                master.save()
+            
+            messages.success(request, "Payment done and reservations confirmed")
+            return redirect("movie_list")
+            
+        else:
+            messages.error(request, "Amount mismatch, Reservation confirmation failed")
+    else:
+        print("Payment not completed, Reservation confirmation failed")
+    
+    return redirect("movie_list")
+        
+    
 
 @login_required
 def hall_seats_view(request, show_id):
@@ -21,9 +68,11 @@ def hall_seats_view(request, show_id):
         try:
             with transaction.atomic():
                 show = Show.objects.get(pk=form_show_id)
+                master = MasterReservation.objects.create()
                 for seat_id in seats_ids:
                     seat = Seat.objects.get(pk=seat_id)
                     Reservation.objects.create(
+                        master_reservation=master,
                         show=show,
                         seat=seat,
                         customer=request.user
@@ -37,8 +86,41 @@ def hall_seats_view(request, show_id):
             
             
         
-        messages.success(request, "Seats has been selected successfully, please continue to payment")
-        return redirect("movie_list")
+        messages.success(request, f"Seats reserved for {settings.RESERVATION_WINDOW_TIME} minutes. Please confirm payment within given time")
+        
+        # initiate_khati_payment()
+        url = "https://dev.khalti.com/api/v2/epayment/initiate/"
+        
+        amount = show.price * len(seats_ids) * 100 # paisa
+
+        payload = json.dumps({
+            "return_url": "http://127.0.0.1:8000/reservation/payment/verification/",
+            "website_url": "http://127.0.0.1:8000/",
+            "amount": str(amount),
+            "purchase_order_id": master.id,
+            "purchase_order_name": "Movie Ticket",
+            "customer_info": {
+                "name": request.user.get_full_name(),
+                "email": request.user.email,
+                "phone": "9800000001"
+            }
+        })
+        headers = {
+            'Authorization': 'key your-api-key',
+            'Content-Type': 'application/json',
+        }
+
+        response = requests.request("POST", url, headers=headers, data=payload)
+        data = response.json()
+        pidx = data.get("pidx")
+        payment_url = data.get("payment_url")
+        print(payment_url)
+        
+        master.pidx = pidx
+        master.amount = amount
+        master.save()
+        
+        return redirect(payment_url)
         
     
     show = get_object_or_404(Show, pk=show_id)
