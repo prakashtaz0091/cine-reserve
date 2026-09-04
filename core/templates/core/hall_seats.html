@@ -188,7 +188,9 @@
         <input type="hidden" name="seats" id="seats" />
         <button
             type="submit"
+            id="continue-checkout-btn"
             class="
+            hidden
                 w-full sm:w-auto
                 px-7 py-3
                 rounded-xl
@@ -217,6 +219,8 @@
     const seatButtons = document.querySelectorAll(".seat-btn");
     const seatsInput = document.getElementById("seats")
     const showInput = document.getElementById("show")
+    const continueCheckoutBtn = document.getElementById("continue-checkout-btn")
+
 
     // Elements from the booking summary
     const selectedSeatsText = document.querySelector(
@@ -233,25 +237,27 @@
             const seatPrice = parseInt(seat.dataset.price);
 
             if (selectedSeats.has(seatName)) {
+                console.log(seatName, "remove")
                 // Deselect
                 selectedSeats.delete(seatName);
                 selectedSeatsId.delete(seatId);
-
+                
                 seat.classList.remove(
                     "bg-purple-600",
                     "border-purple-400",
                     "shadow-lg",
                     "shadow-purple-500/30"
-                );
-
-                seat.classList.add(
-                    "bg-gray-800",
-                    "border-gray-700"
-                );
-                totalPrice -= seatPrice
+                    );
+                    
+                    seat.classList.add(
+                        "bg-gray-800",
+                        "border-gray-700"
+                        );
+                        totalPrice -= seatPrice
             } else {
-                // Select
-                selectedSeats.add(seatName);
+                        console.log(seatName, "add")
+                        // Select
+                        selectedSeats.add(seatName);
                 selectedSeatsId.add(seatId);
                 
                 seat.classList.remove(
@@ -279,9 +285,10 @@
         totalPriceEl.innerText = `${currencyLabel} ${totalPrice}`;
 
         if (seats.length === 0) {
-            selectedSeatsText.textContent = "None selected";
+            continueCheckoutBtn.classList.add("hidden")
             return;
         }
+        continueCheckoutBtn.classList.remove("hidden")
 
         // Sort seats naturally: A1, A2, A10, B1...
         seats.sort((a, b) =>

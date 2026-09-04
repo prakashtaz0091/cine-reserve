@@ -61,7 +61,7 @@ class MasterReservation(models.Model):
     amount = models.PositiveIntegerField(default=0)
     transaction_id = models.CharField(max_length=60, default="")
     payment_status = models.CharField(max_length=20, default="")
-    
+    show = models.ForeignKey(Show, on_delete=models.PROTECT, related_name="master_reservations", null=True) 
     
 
 class Reservation(models.Model):

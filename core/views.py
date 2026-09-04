@@ -9,54 +9,48 @@ from django.db.models import Exists, OuterRef
 from django.db import IntegrityError, transaction
 from django.contrib import messages
 from django.conf import settings
-import requests
-import json
+from .services import initiate_khalti_payment, khalti_payment_lookup
+from .tasks import send_receipt_in_mail
 
 
+@login_required
+def reservation_detail(request, pk):
+    master = get_object_or_404(MasterReservation, pk=pk)
+    # print(master.reservations.values_list('seat__name', flat=True))
+    reserved_seats = master.reservations.values_list('seat__name', flat=True)
+    amount_ruppes = master.amount/100
+    context = {
+        'master': master,
+        'seats' : reserved_seats,
+        'amount': amount_ruppes                
+    }
+    return render(request, "core/reservation-detail.html", context)
 
+
+@login_required
+def reservations(request):
+    master_reservations = MasterReservation.objects.all()
+    context = {
+        'master_reservations': master_reservations
+    }
+    
+    return render(request, "core/reservations.html", context)
+
+
+@login_required
 def verify_reservation_payment(request):
     data = request.GET 
     pidx = data.get('pidx')
     purchase_order_id = data.get('purchase_order_id')
-    try:
-        master = MasterReservation.objects.get(pidx=pidx, pk=purchase_order_id)
-    except MasterReservation.DoesNotExist:
-        print("Something went wrong. Master reservation doesn't exist")
-    except MasterReservation.MultipleObjectsReturned:
-        print("Duplicate pidx exists")
-        
-    url = "https://dev.khalti.com/api/v2/epayment/lookup/"
-    payload = json.dumps({
-            "pidx": pidx
-        })
+    master, verified = khalti_payment_lookup(request=request, pidx=pidx, purchase_order_id=purchase_order_id)
     
-    headers = {
-        'Authorization': 'key your-api-key',
-        'Content-Type': 'application/json',
-        }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-    data_res = response.json()
-    if data_res.get('status') == 'Completed':
-        if int(data_res.get('total_amount')) == master.amount:  
-            with transaction.atomic():
-                master.transaction_id = data_res.get('transaction_id')
-                master.payment_status = 'Completed'
-                master.reservations.all().update(status=Reservation.STATUS_CHOICES.confirmed)
-                master.save()
-            
-            messages.success(request, "Payment done and reservations confirmed")
-            return redirect("movie_list")
-            
-        else:
-            messages.error(request, "Amount mismatch, Reservation confirmation failed")
-    else:
-        print("Payment not completed, Reservation confirmation failed")
+    if verified:
+        send_receipt_in_mail(request, master.id)
+        return redirect("reservations")
     
     return redirect("movie_list")
         
     
-
 @login_required
 def hall_seats_view(request, show_id):
     
@@ -68,7 +62,7 @@ def hall_seats_view(request, show_id):
         try:
             with transaction.atomic():
                 show = Show.objects.get(pk=form_show_id)
-                master = MasterReservation.objects.create()
+                master = MasterReservation.objects.create(show=show)
                 for seat_id in seats_ids:
                     seat = Seat.objects.get(pk=seat_id)
                     Reservation.objects.create(
@@ -88,33 +82,13 @@ def hall_seats_view(request, show_id):
         
         messages.success(request, f"Seats reserved for {settings.RESERVATION_WINDOW_TIME} minutes. Please confirm payment within given time")
         
-        # initiate_khati_payment()
-        url = "https://dev.khalti.com/api/v2/epayment/initiate/"
-        
         amount = show.price * len(seats_ids) * 100 # paisa
-
-        payload = json.dumps({
-            "return_url": "http://127.0.0.1:8000/reservation/payment/verification/",
-            "website_url": "http://127.0.0.1:8000/",
-            "amount": str(amount),
-            "purchase_order_id": master.id,
-            "purchase_order_name": "Movie Ticket",
-            "customer_info": {
-                "name": request.user.get_full_name(),
-                "email": request.user.email,
-                "phone": "9800000001"
-            }
-        })
-        headers = {
-            'Authorization': 'key your-api-key',
-            'Content-Type': 'application/json',
-        }
-
-        response = requests.request("POST", url, headers=headers, data=payload)
-        data = response.json()
-        pidx = data.get("pidx")
-        payment_url = data.get("payment_url")
-        print(payment_url)
+        pidx, payment_url = initiate_khalti_payment(
+            request=request,
+            show=show,
+            master=master,
+            amount=amount
+        )
         
         master.pidx = pidx
         master.amount = amount
@@ -144,7 +118,6 @@ def hall_seats_view(request, show_id):
     }
     return render(request, "core/hall_seats.html", context)
     
-
 
 def home(request):
     

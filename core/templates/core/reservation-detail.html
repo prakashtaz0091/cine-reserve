@@ -1,0 +1,226 @@
+```html
+{% extends "core/base.html" %}
+
+{% block main_content %}
+
+<div class="max-w-4xl mx-auto">
+
+    <!-- Back link -->
+    <div class="mb-6">
+        <a href="{% url 'reservations' %}"
+           class="inline-flex items-center gap-2
+                  text-sm text-gray-400
+                  hover:text-white transition-colors">
+            <span>←</span>
+            Back to Reservations
+        </a>
+    </div>
+
+
+    <!-- Page heading -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white">
+            Reservation Details
+        </h1>
+
+        <p class="text-gray-400 mt-2">
+            Your movie booking information
+        </p>
+    </div>
+
+
+    <!-- Main reservation card -->
+    <div class="bg-gray-900 border border-gray-800
+                rounded-2xl overflow-hidden shadow-2xl">
+
+
+        <!-- Movie header -->
+        <div class="p-6 sm:p-8 border-b border-gray-800">
+
+            <div class="flex flex-col sm:flex-row
+                        sm:items-start sm:justify-between gap-5">
+
+                <div>
+                    <p class="text-sm text-gray-500 uppercase
+                              tracking-wider mb-2">
+                        Movie
+                    </p>
+
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white">
+                        {{ master.show.movie }}
+                    </h2>
+
+                    <div class="flex items-center gap-2
+                                mt-3 text-gray-400">
+                        <span>🕐</span>
+                        <span>{{ master.show.show_time }}</span>
+                    </div>
+                </div>
+
+
+                <!-- Status -->
+                <span class="inline-flex items-center gap-2
+                             self-start
+                             px-3 py-1.5
+                             rounded-full
+                             bg-green-950
+                             border border-green-800
+                             text-green-400
+                             text-sm font-medium">
+
+                    <span class="w-2 h-2
+                                 bg-green-400
+                                 rounded-full">
+                    </span>
+
+                    Confirmed
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Reservation information -->
+        <div class="p-6 sm:p-8">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                <!-- Show time -->
+                <div>
+                    <p class="text-sm text-gray-500 mb-2">
+                        Show Time
+                    </p>
+
+                    <p class="text-white font-medium">
+                        {{ master.show.show_time }}
+                    </p>
+                </div>
+
+
+                <!-- Reservation ID -->
+                <div>
+                    <p class="text-sm text-gray-500 mb-2">
+                        Reservation ID
+                    </p>
+
+                    <p class="text-white font-medium">
+                        #{{ master.id }}
+                    </p>
+                </div>
+
+
+                <!-- Seats -->
+                <div class="sm:col-span-2">
+
+                    <p class="text-sm text-gray-500 mb-3">
+                        Reserved Seats
+                    </p>
+
+                    <div class="flex flex-wrap gap-2">
+
+                        {% for seat in seats %}
+
+                            <span class="inline-flex items-center
+                                         px-3 py-1.5
+                                         bg-gray-800
+                                         border border-gray-700
+                                         rounded-lg
+                                         text-gray-200
+                                         text-sm font-medium">
+                                🎟️ {{ seat }}
+                            </span>
+
+                        {% empty %}
+
+                            <span class="text-gray-500 text-sm">
+                                No seats available
+                            </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Payment summary -->
+        <div class="border-t border-gray-800
+                    bg-gray-950/50
+                    p-6 sm:p-8">
+
+            <div class="flex items-center
+                        justify-between gap-4">
+
+                <div>
+                    <p class="text-sm text-gray-500">
+                        Total Amount
+                    </p>
+
+                    <p class="text-gray-400 text-sm mt-1">
+                        Reservation payment
+                    </p>
+                </div>
+
+                <p class="text-2xl font-bold text-white">
+                    Rs. {{ amount }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Actions -->
+        <div class="border-t border-gray-800
+                    p-6 sm:p-8
+                    flex flex-col sm:flex-row
+                    gap-3 sm:justify-end">
+
+            <a href="{% url 'reservations' %}"
+               class="inline-flex items-center
+                      justify-center
+                      px-5 py-2.5
+                      bg-gray-800
+                      border border-gray-700
+                      text-gray-300
+                      font-medium text-sm
+                      rounded-lg
+                      hover:bg-gray-700
+                      hover:text-white
+                      transition-colors">
+                Back to Reservations
+            </a>
+
+            <a href="#"
+               class="inline-flex items-center
+                      justify-center gap-2
+                      px-5 py-2.5
+                      bg-white
+                      text-gray-950
+                      font-semibold text-sm
+                      rounded-lg
+                      hover:bg-gray-200
+                      transition-colors">
+                <span>↓</span>
+                Download Receipt
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Small help text -->
+    <p class="text-center text-gray-600 text-sm mt-6">
+        Please keep your reservation details for your records.
+    </p>
+
+</div>
+
+{% endblock main_content %}
+```

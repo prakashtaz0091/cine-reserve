@@ -4,6 +4,7 @@ from .models import *
 
 admin.site.register(Movie)
 admin.site.register(Cinema)
+admin.site.register(MasterReservation)
 
 
 @admin.register(CinemaHall)
@@ -23,5 +24,5 @@ class ShowAdmin(admin.ModelAdmin):
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-    list_display = ["customer", "show", "seat"]
+    list_display = ["customer", "seat"]
 

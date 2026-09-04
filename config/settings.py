@@ -145,3 +145,12 @@ CELERY_TIMEZONE = "Asia/Kathmandu"
 RESERVATION_WINDOW_TIME = 5 # minutes
 
 LOGIN_URL = 'login'
+
+KHALTI_INITIATE_URL = "https://dev.khalti.com/api/v2/epayment/initiate/"
+KHALTI_LOOKUP_URL = "https://dev.khalti.com/api/v2/epayment/lookup/"
+KHALTI_API_SECRET_KEY = ""
+KHALTI_RETURN_URL = "http://127.0.0.1:8000/reservation/payment/verification/"
+WEBSITE_URL = "http://127.0.0.1:8000/"
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
