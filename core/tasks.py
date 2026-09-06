@@ -2,7 +2,9 @@ from celery import shared_task
 from .models import Reservation
 from django.utils import timezone
 from django.core.mail import send_mail
-from django.urls import reverse
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives 
+from django.template.loader import render_to_string
 
 
 @shared_task
@@ -21,21 +23,41 @@ def cleanup_expired_and_cancelled_reservations():
 
 
 # @shared_task
-def send_receipt_in_mail(request, master_id):
+# def send_receipt_in_mail(reservation_detail_url, full_name, user_email):
     
-    reservation_url = request.build_absolute_uri(
-        reverse("reservation_detail", kwargs={"pk": master_id})
-    )
-    send_mail(
-        "Reservation Success",
-        f"""Hello, {request.user.get_full_name()} !
-        Your show reservation is completed successfully. 
-        Please use the given link to see reservation details or download receipt
+    
+#     send_mail(
+#         "Reservation Success",
+#         f"""Hello, {full_name} !
+#         Your show reservation is completed successfully. 
+#         Please use the given link to see reservation details or download receipt
         
-        {reservation_url}
-        """,
-        "from@example.com",
-        ["to@example.com"],
-        fail_silently=False,
+#         {reservation_detail_url}
+#         """,
+#         settings.DEFAULT_FROM_EMAIL,
+#         [user_email, "dip.mind@outlook.com", "raydinesh2014@gmail.com", "veyola3213@94an.com"],
+#         fail_silently=False,
+#     )
+
+
+@shared_task
+def send_receipt_in_mail(reservation_detail_url, full_name, user_email):
+    html_content = render_to_string(
+        "email/reservation-success-mail.html",
+        {
+            "full_name": full_name,
+            "reservation_detail_url": reservation_detail_url,
+        },
     )
-    
+
+    email = EmailMultiAlternatives(
+        subject="Reservation Success",
+        body="",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[
+            user_email,
+        ],
+    )
+
+    email.attach_alternative(html_content, "text/html")
+    email.send(fail_silently=False)

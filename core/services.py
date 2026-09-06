@@ -45,14 +45,14 @@ def khalti_payment_lookup(request, pidx, purchase_order_id):
     return master, False
 
 
-def initiate_khalti_payment(request, show, master, amount):
+def initiate_khalti_payment(request, master, amount):
     url = settings.KHALTI_INITIATE_URL
 
     payload = json.dumps({
         "return_url": settings.KHALTI_RETURN_URL,
         "website_url": settings.WEBSITE_URL,
         "amount": str(amount),
-        "purchase_order_id": master.id,
+        "purchase_order_id": str(master.id),
         "purchase_order_name": "Movie Ticket",
         "customer_info": {
             "name": request.user.get_full_name(),

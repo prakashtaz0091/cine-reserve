@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -57,10 +58,15 @@ class Show(models.Model):
 
 
 class MasterReservation(models.Model):
-    pidx = models.CharField(max_length=60, help_text="Payment intiate id from khalti", default="")
+    id =  models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid7,
+        editable=False,
+    )
+    pidx = models.CharField(max_length=60, help_text="Payment intiate id from khalti", null=True)
     amount = models.PositiveIntegerField(default=0)
-    transaction_id = models.CharField(max_length=60, default="")
-    payment_status = models.CharField(max_length=20, default="")
+    transaction_id = models.CharField(max_length=60, null=True)
+    payment_status = models.CharField(max_length=20, null=True)
     show = models.ForeignKey(Show, on_delete=models.PROTECT, related_name="master_reservations", null=True) 
     
 

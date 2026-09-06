@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, sans-serif;">
+
+    <div style="max-width: 600px; margin: 40px auto; background: #ffffff; padding: 40px; border-radius: 8px;">
+
+        <h2 style="color: #333333; margin-top: 0;">
+            Reservation Successful!
+        </h2>
+
+        <p style="font-size: 16px; color: #555555;">
+            Hello, {{ full_name }}!
+        </p>
+
+        <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+            Your show reservation has been completed successfully.
+        </p>
+
+        <p style="font-size: 16px; color: #555555; line-height: 1.6;">
+            Please click the button below to view your reservation details
+            or download your receipt.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ reservation_detail_url }}"
+               style="
+                    display: inline-block;
+                    padding: 12px 24px;
+                    background-color: #007bff;
+                    color: #ffffff;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    font-size: 16px;
+               ">
+                View Reservation
+            </a>
+        </div>
+
+        <p style="font-size: 13px; color: #888888; word-break: break-all;">
+            {{ reservation_detail_url }}
+        </p>
+
+        <hr style="border: none; border-top: 1px solid #eeeeee; margin: 30px 0;">
+
+        <p style="font-size: 13px; color: #999999;">
+            Thank you for your reservation.
+        </p>
+
+    </div>
+
+</body>
+</html>
