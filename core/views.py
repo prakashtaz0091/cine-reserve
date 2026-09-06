@@ -11,6 +11,8 @@ from django.contrib import messages
 from django.conf import settings
 from .services import initiate_khalti_payment, khalti_payment_lookup
 from .tasks import send_receipt_in_mail
+from django.urls import reverse
+
 
 
 @login_required
@@ -45,7 +47,14 @@ def verify_reservation_payment(request):
     master, verified = khalti_payment_lookup(request=request, pidx=pidx, purchase_order_id=purchase_order_id)
     
     if verified:
-        send_receipt_in_mail(request, master.id)
+        reservation_url = request.build_absolute_uri(
+                reverse("reservation_detail", kwargs={"pk": master.id})
+            )
+        send_receipt_in_mail.delay(
+            reservation_detail_url=reservation_url,
+            full_name=request.user.get_full_name(),
+            user_email=request.user.email,
+        )
         return redirect("reservations")
     
     return redirect("movie_list")
@@ -85,7 +94,6 @@ def hall_seats_view(request, show_id):
         amount = show.price * len(seats_ids) * 100 # paisa
         pidx, payment_url = initiate_khalti_payment(
             request=request,
-            show=show,
             master=master,
             amount=amount
         )
