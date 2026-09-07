@@ -15,6 +15,14 @@ from django.urls import reverse
 
 
 
+def reservation_qr_verification(request):
+    if request.method == "POST":
+        master_id = request.POST.get('master_id')
+        print(master_id)
+        
+    return render(request, "core/qr-verification.html")
+
+
 @login_required
 def reservation_detail(request, pk):
     master = get_object_or_404(MasterReservation, pk=pk)

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>QR Scanner</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .scanner {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .camera-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #000;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* QR scanning frame */
+    .scan-frame {
+      position: absolute;
+      width: 65%;
+      height: 65%;
+      left: 17.5%;
+      top: 17.5%;
+      border: 3px solid #00ff88;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+    }
+
+    .scan-line {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: #00ff88;
+      top: 0;
+      animation: scan 2s infinite linear;
+    }
+
+    @keyframes scan {
+      0% {
+        top: 0;
+      }
+      50% {
+        top: 100%;
+      }
+      100% {
+        top: 0;
+      }
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #startBtn {
+      background: #00c878;
+      color: white;
+    }
+
+    #stopBtn {
+      background: #e53935;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 20px;
+      color: #aaa;
+    }
+
+    .result {
+      margin-top: 15px;
+      padding: 15px;
+      background: #222;
+      border-radius: 10px;
+      word-break: break-all;
+      text-align: left;
+    }
+
+    .result a {
+      color: #00ff88;
+    }
+
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="scanner">
+
+    <h1>QR Scanner</h1>
+
+    <div class="camera-container">
+      <video id="video" autoplay playsinline></video>
+
+      <div class="scan-frame">
+        <div class="scan-line"></div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button id="startBtn">Start Camera</button>
+      <button id="stopBtn" disabled>Stop Camera</button>
+    </div>
+
+    <div id="status">
+      Camera is stopped.
+    </div>
+
+    <div class="result">
+      <strong>QR Result:</strong>
+      <div id="result">Nothing scanned yet.</div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+
+    let stream = null;
+    let scanning = false;
+    let animationId = null;
+
+    // Create BarcodeDetector
+    let barcodeDetector = null;
+
+    if ("BarcodeDetector" in window) {
+      barcodeDetector = new BarcodeDetector({
+        formats: ["qr_code"]
+      });
+    }
+
+    async function startCamera() {
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        status.textContent =
+          "Camera API is not supported by this browser.";
+        return;
+      }
+
+      if (!barcodeDetector) {
+        status.textContent =
+          "QR detection is not supported by this browser.";
+        return;
+      }
+
+      try {
+
+        status.textContent = "Requesting camera permission...";
+
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: {
+              ideal: "environment"
+            },
+            width: {
+              ideal: 1280
+            },
+            height: {
+              ideal: 720
+            }
+          },
+          audio: false
+        });
+
+        video.srcObject = stream;
+
+        await video.play();
+
+        scanning = true;
+
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+
+        status.textContent = "Point the rear camera at a QR code.";
+
+        scanQRCode();
+
+      } catch (error) {
+
+        console.error(error);
+
+        status.textContent =
+          "Unable to access camera: " + error.message;
+
+      }
+    }
+
+    function stopCamera() {
+
+      scanning = false;
+
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+
+      if (stream) {
+
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
+
+        stream = null;
+      }
+
+      video.srcObject = null;
+
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+
+      status.textContent = "Camera is stopped.";
+    }
+
+    async function scanQRCode() {
+
+      if (!scanning) {
+        return;
+      }
+
+      if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        ctx.drawImage(
+          video,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+        try {
+
+          const barcodes = await barcodeDetector.detect(canvas);
+
+          if (barcodes.length > 0) {
+
+            const qrValue = barcodes[0].rawValue;
+
+            result.textContent = qrValue;
+
+            status.textContent = "QR code detected!";
+
+            // Optional vibration on mobile
+            if ("vibrate" in navigator) {
+              navigator.vibrate(200);
+            }
+
+            console.log("QR Code:", qrValue);
+
+            // Stop after successful scan
+            stopCamera();
+
+            // verify qrValue/master_id with backend
+            return;
+          }
+
+        } catch (error) {
+          console.error("QR detection error:", error);
+        }
+      }
+
+      animationId = requestAnimationFrame(scanQRCode);
+    }
+
+    startBtn.addEventListener("click", startCamera);
+    stopBtn.addEventListener("click", stopCamera);
+
+    // Stop camera if page is closed/navigated away
+    window.addEventListener("beforeunload", stopCamera);
+  </script>
+
+</body>
+</html>
