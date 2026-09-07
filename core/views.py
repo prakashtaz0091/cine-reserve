@@ -15,6 +15,14 @@ from django.urls import reverse
 
 
 
+def reservation_qr_verification(request):
+    if request.method == "POST":
+        master_id = request.POST.get('master_id')
+        print(master_id)
+        
+    return render(request, "core/qr-verification.html")
+
+
 @login_required
 def reservation_detail(request, pk):
     master = get_object_or_404(MasterReservation, pk=pk)
@@ -52,6 +60,7 @@ def verify_reservation_payment(request):
             )
         send_receipt_in_mail.delay(
             reservation_detail_url=reservation_url,
+            master_id=str(master.id),
             full_name=request.user.get_full_name(),
             user_email=request.user.email,
         )
