@@ -133,6 +133,7 @@
       display: none;
     }
   </style>
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body>
@@ -140,8 +141,11 @@
   <div class="scanner">
 
     <h1>QR Scanner</h1>
+    <div id="verification-result">    </div>
 
-    <div class="camera-container">
+
+
+    <div id="camera-container" class="camera-container">
       <video id="video" autoplay playsinline></video>
 
       <div class="scan-frame">
@@ -161,9 +165,26 @@
     <div class="result">
       <strong>QR Result:</strong>
       <div id="result">Nothing scanned yet.</div>
+
+
+      <form
+        hx-post="{% url 'reservation_qr_verification' %}"
+        hx-target="#verification-result"
+        hx-swap="innerHTML"
+
+      >
+        {% csrf_token %}
+
+        <input type="hidden" name="master_id" id="qr-result-input">
+
+        <button type="submit" class="buttons">
+          Verify
+        </button>
+      </form>
     </div>
 
     <canvas id="canvas"></canvas>
+      
 
   </div>
 
@@ -177,6 +198,9 @@
 
     const status = document.getElementById("status");
     const result = document.getElementById("result");
+    const resultFormInput = document.getElementById("qr-result-input")
+    const verificationResultDiv = document.getElementById("verification-result")
+    const cameraContainer = document.getElementById("camera-container")
 
     let stream = null;
     let scanning = false;
@@ -192,6 +216,8 @@
     }
 
     async function startCamera() {
+      
+      verificationResultDiv.innerHTML = ""
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         status.textContent =
@@ -301,6 +327,7 @@
             const qrValue = barcodes[0].rawValue;
 
             result.textContent = qrValue;
+            resultFormInput.value = qrValue;
 
             status.textContent = "QR code detected!";
 
@@ -313,8 +340,6 @@
 
             // Stop after successful scan
             stopCamera();
-
-            // verify qrValue/master_id with backend
             return;
           }
 
@@ -332,6 +357,8 @@
     // Stop camera if page is closed/navigated away
     window.addEventListener("beforeunload", stopCamera);
   </script>
+
+
 
 </body>
 </html>

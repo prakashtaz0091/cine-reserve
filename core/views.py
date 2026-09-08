@@ -12,13 +12,28 @@ from django.conf import settings
 from .services import initiate_khalti_payment, khalti_payment_lookup
 from .tasks import send_receipt_in_mail
 from django.urls import reverse
+from django.http import HttpResponse
 
 
 
 def reservation_qr_verification(request):
     if request.method == "POST":
         master_id = request.POST.get('master_id')
-        print(master_id)
+        try:
+            master = get_object_or_404(MasterReservation, pk=master_id)
+        except Exception:
+            return HttpResponse("<h1> Ticket doesn't exist </h1>")
+            
+        context = {
+            'movie_name': master.show.movie.name,
+            'show_time': master.show.show_time,
+            'seats': Seat.objects.filter(reservations__in=master.reservations.all())
+        }
+        if master:
+            return render(request, "core/ticket.html", context)
+        else:
+            return HttpResponse("<h1> Ticket doesn't exist </h1>")
+        
         
     return render(request, "core/qr-verification.html")
 

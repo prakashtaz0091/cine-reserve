@@ -1,0 +1,46 @@
+
+<div class="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-lg">
+
+    <!-- Ticket Header -->
+    <div class="bg-gray-900 px-6 py-5 text-white">
+        <p class="text-xs uppercase tracking-widest text-gray-400">
+            Movie Ticket
+        </p>
+
+        <h1 class="mt-1 text-2xl font-bold">
+            {{ movie_name }}
+        </h1>
+    </div>
+
+    <!-- Ticket Details -->
+    <div class="space-y-5 p-6">
+
+        <div>
+            <p class="text-sm text-gray-500">Show Time</p>
+            <p class="mt-1 text-lg font-semibold text-gray-900">
+                {{ show_time }}
+            </p>
+        </div>
+
+        <div>
+            <p class="text-sm text-gray-500">Seats</p>
+
+            <div class="mt-2 flex flex-wrap gap-2">
+                {% for seat in seats %}
+                    <span class="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-800">
+                        {{ seat }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Ticket Footer -->
+    <div class="border-t border-dashed border-gray-300 px-6 py-4 text-center">
+        <p class="text-xs text-gray-500">
+            Thank you for your reservation!
+        </p>
+    </div>
+
+</div>
