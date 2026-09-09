@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "core",
     "django_celery_beat",
+    "cine_admin"
 ]
 
 MIDDLEWARE = [

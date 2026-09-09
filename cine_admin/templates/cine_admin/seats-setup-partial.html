@@ -1,0 +1,149 @@
+
+
+<div class="space-y-6">
+
+    <!-- Seat Dimensions -->
+    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+
+        <div class="mb-5">
+            <h3 class="text-base font-semibold text-slate-900">
+                Seat Dimensions
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Define the number of rows and columns for this hall.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+            <!-- Rows -->
+            <div>
+                <label
+                    for="row"
+                    class="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                    No. of Rows
+                </label>
+
+                <input
+                    class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                    type="number"
+                    id="row"
+                    name="row"
+                    min="1"
+                    placeholder="Enter number of rows"  
+                    value="{{hall.row}}"
+                />
+            </div>
+
+            <!-- Columns -->
+            <div>
+                <label
+                    for="col"
+                    class="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                    No. of Columns
+                </label>
+
+                <input
+                    class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                    type="number"
+                    id="col"
+                    name="col"
+                    min="1"
+                    placeholder="Enter number of columns"
+                    value="{{hall.col}}"
+                />
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Cinema Layout Preview -->
+    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+
+        <div class="mb-6">
+            <h3 class="text-base font-semibold text-slate-900">
+                Cinema Layout
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Preview and configure the seating arrangement.
+            </p>
+        </div>
+
+
+        <!-- Screen -->
+        <div class="mb-8 flex flex-col items-center">
+
+            <div class="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                    />
+                </svg>
+                Screen
+            </div>
+
+            <div
+                id="show-screen"
+                class="flex h-12 w-full max-w-2xl items-center justify-center rounded-t-[50%] border-b-4 border-indigo-500 bg-gradient-to-b from-slate-200 to-slate-100 text-sm font-semibold tracking-widest text-slate-600 shadow-sm"
+            >
+                SHOW SCREEN
+            </div>
+
+        </div>
+
+
+        <!-- Seat Grid -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div
+                id="seat-grid"
+                class="flex min-w-max flex-col items-center gap-3"
+            ></div>
+        </div>
+
+    </div>
+
+
+    <!-- Existing Seats -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+
+        <div class="mb-5">
+            <h3 class="text-base font-semibold text-slate-900">
+                Existing Seats
+            </h3>
+            <p class="mt-1 text-sm text-slate-500">
+                Seat names currently configured for this hall.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-{{hall.col}} gap-2">
+
+            {% for seat in seats %}
+
+                <input
+                    type="text"
+                    id="{{seat.id}}"
+                    name="{{seat.id}}"
+                    value="{{seat.name}}"
+                    class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2.5 text-center text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+                />
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+

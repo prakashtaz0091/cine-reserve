@@ -1,0 +1,29 @@
+<select
+    class="text-black block w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+    id="hall" name="hall" class="text-black"
+    hx-get="{% url 'get_hall_seats' %}"
+    hx-trigger="change"
+    hx-include="this"
+    hx-target="#seats-section"
+    hx-swap="innerHTML"
+
+>
+       {% for hall in halls %}
+         <option value="{{hall.id}}">{{ hall.name }}</option>
+        {% endfor %}
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+  <svg
+      class="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+  >
+      <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 9l-7 7-7-7"
+      />
+  </svg>
+</div>

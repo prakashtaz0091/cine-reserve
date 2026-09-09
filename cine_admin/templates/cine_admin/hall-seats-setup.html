@@ -1,0 +1,233 @@
+{% extends "core/base.html" %}
+
+{% block main_content %}
+
+<div class="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl">
+
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                    Cinema Seat Setup
+                </h1>
+                <p class="mt-1 text-sm text-slate-500">
+                    Select a cinema and hall, then configure the seating layout.
+                </p>
+            </div>
+
+            <div class="hidden sm:flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span class="text-sm font-medium text-slate-600">Seat Configuration</span>
+            </div>
+        </div>
+    </div>
+
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Selection Card -->
+        <div class="mb-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+
+            <div class="border-b border-slate-200 px-6 py-5">
+                <h2 class="text-lg font-semibold text-slate-900">
+                    Hall Selection
+                </h2>
+                <p class="mt-1 text-sm text-slate-500">
+                    Choose the cinema and hall you want to configure.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
+
+                <!-- Cinema -->
+                <div>
+                    <label
+                        for="cinema"
+                        class="mb-2 block text-sm font-semibold text-slate-700"
+                    >
+                        Choose a Cinema
+                    </label>
+
+                    <div class="relative">
+                        <select
+                            id="cinema"
+                            name="cinema_id"
+                            class="text-black block w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                            hx-get="{% url 'get_cinema_halls' %}"
+                            hx-trigger="change"
+                            hx-include="this"
+                            hx-target="#hall"
+                            hx-swap="outerHTML"
+                        >
+                            {% for cinema in cinemas %}
+                                <option value="{{cinema.id}}">
+                                    {{ cinema.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Hall -->
+                <div>
+                    <label
+                        for="hall"
+                        class="mb-2 block text-sm font-semibold text-slate-700"
+                    >
+                        Choose a Hall
+                    </label>
+
+                    <div class="relative">
+                        {% include "cine_admin/hall-select-partial.html" %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Seat Configuration -->
+        <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+
+            <div class="border-b border-slate-200 px-6 py-5">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">
+                            Seat Layout
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Configure the seats available in this cinema hall.
+                        </p>
+                    </div>
+
+                    <div class="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-700">
+                        Seating Configuration
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-6">
+                <div class="text-black" id="seats-section">
+                    {% include "cine_admin/seats-setup-partial.html" %}
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Bottom Actions -->
+        <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+
+            <button
+                type="submit"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 active:scale-[0.98] sm:w-auto"
+            >
+                <svg
+                    class="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                    />
+                </svg>
+
+                Save Seat Layout
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+</div>
+
+<script>
+    function initSeatGrid() {
+        const rowInput = document.getElementById("row");
+        const colInput = document.getElementById("col");
+        const seatGrid = document.getElementById("seat-grid");
+
+        if (!rowInput || !colInput || !seatGrid) {
+            return;
+        }
+
+        function generateGrid() {
+
+            const rows = parseInt(rowInput.value);
+            const cols = parseInt(colInput.value);
+
+            seatGrid.innerHTML = "";
+
+            if (!rows || !cols || rows < 1 || cols < 1) {
+                return;
+            }
+
+            for (let r = 1; r <= rows; r++) {
+                const row = document.createElement("div");
+                row.className = "flex gap-2 mb-2";
+
+                const rowLetter = String.fromCharCode(64 + r);
+
+                for (let c = 1; c <= cols; c++) {
+                    const input = document.createElement("input");
+
+                    input.type = "text";
+                    input.name = "seat";
+                    input.value = `${rowLetter}${c}`;
+
+                    input.className = "text-black w-16 p-2 border rounded";
+
+                    row.appendChild(input);
+                }
+
+                seatGrid.appendChild(row);
+            }
+        }
+
+        rowInput.addEventListener("input", generateGrid);
+        colInput.addEventListener("input", generateGrid);
+
+        // Generate initially for the newly loaded partial
+        generateGrid();
+    }
+
+    // Initial page load
+    document.addEventListener("DOMContentLoaded", initSeatGrid);
+
+    // After HTMX replaces #seats-section
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        if (event.detail.target.id === "seats-section") {
+            initSeatGrid();
+        }
+    });
+</script>
+
+{% endblock main_content %}

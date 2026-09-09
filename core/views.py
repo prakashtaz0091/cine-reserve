@@ -144,6 +144,11 @@ def hall_seats_view(request, show_id):
             )
         )
     )
+    
+    seats = sorted(
+        seats,
+        key=lambda seat: (seat.name[0],int(seat.name[1:]))
+        )
     context = {
         'show':show,
         'seats':seats
