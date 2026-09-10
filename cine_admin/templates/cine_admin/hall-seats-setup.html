@@ -44,12 +44,18 @@
 
                 <!-- Cinema -->
                 <div>
-                    <label
+                    <div class="mb-2 flex gap-2 items-center">
+                        <label
                         for="cinema"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
+                        class=" block text-sm font-semibold text-slate-700"
                     >
                         Choose a Cinema
                     </label>
+                    <button class="text-black px-2 border rounded" 
+                    
+                    
+                    >+</button>
+                    </div>
 
                     <div class="relative">
                         <select
@@ -90,12 +96,18 @@
 
                 <!-- Hall -->
                 <div>
-                    <label
-                        for="hall"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
+                    <div class="mb-2 flex gap-2 items-center">
+                        <label
+                        for="cinema"
+                        class=" block text-sm font-semibold text-slate-700"
                     >
                         Choose a Hall
                     </label>
+                    <button class="text-black px-2 border rounded" 
+                    
+                    
+                    >+</button>
+                    </div>
 
                     <div class="relative">
                         {% include "cine_admin/hall-select-partial.html" %}
