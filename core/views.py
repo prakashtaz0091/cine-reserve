@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Movie, Show, Reservation, Seat, MasterReservation
+from .models import Movie, Show, Reservation, Seat, MasterReservation, Cinema
 from django.utils import timezone
 from .forms import RegisterForm
 from django.contrib.auth.models import User
@@ -13,6 +13,9 @@ from .services import initiate_khalti_payment, khalti_payment_lookup
 from .tasks import send_receipt_in_mail
 from django.urls import reverse
 from django.http import HttpResponse
+from django.template.loader import render_to_string
+from collections import OrderedDict
+
 
 
 
@@ -168,13 +171,53 @@ def home(request):
     return render(request, "core/home.html", context)
 
 
+def get_shows_partial(request):
+    cinema_id = request.GET.get('cinema')
+    movie_id = request.GET.get('movie_id')
+
+    if not cinema_id or not movie_id:
+        shows_by_date = OrderedDict()
+    else:
+        shows = (
+            Show.objects
+            .filter(
+                movie_id=movie_id,
+                show_time__gt=timezone.now(),
+            )
+            .order_by('show_time')
+        )
+
+        shows_by_date = OrderedDict()
+
+        for show in shows:
+            # Convert to local time before extracting the date
+            local_date = timezone.localtime(show.show_time).date()
+
+            if local_date not in shows_by_date:
+                shows_by_date[local_date] = []
+
+            shows_by_date[local_date].append(show)
+
+    context = {
+        'shows_by_date': shows_by_date,
+        'from_date': timezone.now(),
+    }
+
+    return HttpResponse(
+        render_to_string(
+            "core/shows-partial.html",
+            context
+        )
+    )
+    
+    
 def movie_detail(request, pk):
     movie = Movie.objects.get(pk=pk)
-    shows = Show.objects.filter(movie=movie, show_time__gt=timezone.now())
+    cinemas = Cinema.objects.all()
     # print(shows[0].show_time, timezone.now())
     context = {
         'movie': movie,
-        'shows': shows,
+        'cinemas':cinemas,
         "from_date": timezone.now(),
     }
     return render(request, "core/movie_detail.html", context)

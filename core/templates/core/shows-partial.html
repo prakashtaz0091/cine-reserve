@@ -1,0 +1,378 @@
+<div id="shows-container">
+
+    {% if shows_by_date %}
+
+        <!-- =========================
+             DATE TABS
+        ========================== -->
+        <div class="mb-6 overflow-x-auto">
+            <div class="flex gap-2 min-w-max">
+
+                {% for date, shows in shows_by_date.items %}
+
+                    <button
+                        type="button"
+                        onclick="showDateTab('{{ date|date:'Y-m-d' }}')"
+                        data-date-tab="{{ date|date:'Y-m-d' }}"
+                        class="
+                            date-tab
+                            px-5 py-3
+                            rounded-lg
+                            border
+                            transition
+                            duration-200
+                            focus:outline-none
+
+                            {% if forloop.first %}
+                                bg-red-600
+                                text-white
+                                border-red-600
+                            {% else %}
+                                bg-gray-900
+                                text-gray-300
+                                border-gray-700
+                                hover:bg-gray-800
+                                hover:border-gray-600
+                            {% endif %}
+                        "
+                    >
+
+                        <!-- Day -->
+                        <span
+                            class="
+                                block
+                                text-xs
+                                uppercase
+                                tracking-wider
+                                {% if forloop.first %}
+                                    text-red-100
+                                {% else %}
+                                    text-gray-500
+                                {% endif %}
+                            "
+                        >
+                            {{ date|date:"D" }}
+                        </span>
+
+                        <!-- Date -->
+                        <span class="block text-lg font-bold">
+                            {{ date|date:"M d" }}
+                        </span>
+
+                    </button>
+
+                {% endfor %}
+
+            </div>
+        </div>
+
+
+        <!-- =========================
+             SHOWS
+        ========================== -->
+        {% for date, shows in shows_by_date.items %}
+
+            <div
+                id="shows-{{ date|date:'Y-m-d' }}"
+                data-date="{{ date|date:'Y-m-d' }}"
+                class="
+                    date-shows
+                    {% if not forloop.first %}
+                        hidden
+                    {% endif %}
+                "
+            >
+
+                <!-- Shows Grid -->
+                <div
+                    class="
+                        grid
+                        grid-cols-1
+                        sm:grid-cols-2
+                        lg:grid-cols-3
+                        gap-5
+                    "
+                >
+
+                    {% for show in shows %}
+
+                        <!-- =========================
+                             SHOW CARD
+                        ========================== -->
+                        <div
+                            class="
+                                bg-gray-900
+                                border
+                                border-gray-800
+                                rounded-xl
+                                p-6
+                                hover:border-gray-600
+                                hover:shadow-lg
+                                transition
+                                duration-200
+                            "
+                        >
+
+                            <!-- Cinema Hall -->
+                            <p class="text-xl font-bold mb-5">
+                                {{ show.cinemahall }}
+                            </p>
+
+
+                            <!-- Show Date -->
+                            <div class="mb-5">
+
+                                <p
+                                    class="
+                                        text-xs
+                                        uppercase
+                                        tracking-wider
+                                        text-gray-500
+                                        mb-1
+                                    "
+                                >
+                                    Date
+                                </p>
+
+                                <p class="text-lg font-semibold">
+
+                                    {{ show.show_time|date:"Y-m-d" }}
+
+                                    <br>
+
+                                    {{ show.show_time|timeuntil:from_date }}
+                                    remaining
+
+                                </p>
+
+                            </div>
+
+
+                            <!-- Show Time -->
+                            <div class="mb-5">
+
+                                <p
+                                    class="
+                                        text-xs
+                                        uppercase
+                                        tracking-wider
+                                        text-gray-500
+                                        mb-1
+                                    "
+                                >
+                                    Show Time
+                                </p>
+
+                                <p class="text-3xl font-bold">
+                                    {{ show.show_time|time:"g:i A" }}
+                                </p>
+
+                            </div>
+
+
+                            <!-- Screen -->
+                            {% if show.screen %}
+
+                                <div
+                                    class="
+                                        flex
+                                        items-center
+                                        justify-between
+                                        border-t
+                                        border-gray-800
+                                        pt-4
+                                        mb-5
+                                    "
+                                >
+
+                                    <span class="text-gray-500">
+                                        Screen
+                                    </span>
+
+                                    <span
+                                        class="
+                                            text-gray-300
+                                            font-medium
+                                        "
+                                    >
+                                        {{ show.screen }}
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- Book Button -->
+                            <a
+                                href="{% url 'hall_seats' show.id %}"
+                                class="
+                                    block
+                                    w-full
+                                    text-center
+                                    bg-red-600
+                                    hover:bg-red-700
+                                    active:bg-red-800
+                                    text-white
+                                    font-semibold
+                                    py-3
+                                    px-4
+                                    rounded-lg
+                                    transition
+                                    duration-200
+                                "
+                            >
+                                Book Tickets
+                            </a>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+
+    {% else %}
+
+        <!-- =========================
+             EMPTY STATE
+        ========================== -->
+        <div
+            class="
+                bg-gray-900
+                border
+                border-gray-800
+                rounded-xl
+                p-12
+                text-center
+            "
+        >
+
+            <div class="text-5xl mb-4">
+                🎟️
+            </div>
+
+            <h3 class="text-xl font-semibold">
+                No Shows Available
+            </h3>
+
+            <p class="text-gray-400 mt-2">
+                There are currently no shows scheduled
+                for this movie.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================
+     DATE TAB JAVASCRIPT
+========================== -->
+<script>
+
+    function showDateTab(date) {
+
+        /*
+         * Hide all show sections
+         */
+        document.querySelectorAll('.date-shows').forEach(section => {
+
+            section.classList.add('hidden');
+
+        });
+
+
+        /*
+         * Reset all tabs
+         */
+        document.querySelectorAll('.date-tab').forEach(tab => {
+
+            tab.classList.remove(
+                'bg-red-600',
+                'text-white',
+                'border-red-600'
+            );
+
+            tab.classList.add(
+                'bg-gray-900',
+                'text-gray-300',
+                'border-gray-700'
+            );
+
+            /*
+             * Reset day text color
+             */
+            const day = tab.querySelector('span:first-child');
+
+            if (day) {
+
+                day.classList.remove('text-red-100');
+
+                day.classList.add('text-gray-500');
+
+            }
+
+        });
+
+
+        /*
+         * Show selected date
+         */
+        const selectedSection = document.getElementById(
+            'shows-' + date
+        );
+
+        if (selectedSection) {
+
+            selectedSection.classList.remove('hidden');
+
+        }
+
+
+        /*
+         * Highlight selected tab
+         */
+        const selectedTab = document.querySelector(
+            `[data-date-tab="${date}"]`
+        );
+
+        if (selectedTab) {
+
+            selectedTab.classList.remove(
+                'bg-gray-900',
+                'text-gray-300',
+                'border-gray-700'
+            );
+
+            selectedTab.classList.add(
+                'bg-red-600',
+                'text-white',
+                'border-red-600'
+            );
+
+
+            /*
+             * Change day text color
+             */
+            const day = selectedTab.querySelector('span:first-child');
+
+            if (day) {
+
+                day.classList.remove('text-gray-500');
+
+                day.classList.add('text-red-100');
+
+            }
+
+        }
+
+    }
+
+</script>

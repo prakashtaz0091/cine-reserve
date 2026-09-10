@@ -10,5 +10,7 @@ urlpatterns = [
     path('reservation/payment/verification/', views.verify_reservation_payment, name="verify_reservation_payment"),
     path('reservations/', views.reservations, name="reservations"),
     path('reservations/<pk>/', views.reservation_detail, name="reservation_detail"),
-    path('reservations/qr/verify/', views.reservation_qr_verification, name="reservation_qr_verification")
+    path('reservations/qr/verify/', views.reservation_qr_verification, name="reservation_qr_verification"),
+    path('shows/', views.get_shows_partial, name="get_shows_partial"),
+    
 ]

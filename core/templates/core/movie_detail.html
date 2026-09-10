@@ -111,130 +111,47 @@
                     Select a showtime to book your tickets
                 </p>
 
-            </div>
-
-
-            {% if shows %}
-
-                <!-- Shows Grid -->
-                <div
-                    class="grid grid-cols-1 sm:grid-cols-2
-                           lg:grid-cols-3 gap-5"
+                <form
+                       hx-get="{% url 'get_shows_partial' %}"
+                        hx-target="#shows-container"
+                        hx-swap="outerHTML"
+                    hx-trigger="change from:#cinema"
                 >
-
-                    {% for show in shows %}
-
-                        <div
-                            class="bg-gray-900 border border-gray-800
-                                   rounded-xl p-6
-                                   hover:border-gray-600
-                                   hover:shadow-lg transition"
+                    <input type="hidden" name="movie_id" value="{{movie.id}}" />
+                    
+                    <div>
+                        <select
+                            class="text-black block w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm shadow-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                            id="cinema" name="cinema" class="text-black"
+                            
                         >
-
-                            <!-- Show Date -->
-                            <div class="mb-5">
-
-                                <p
-                                    class="text-xs uppercase
-                                           tracking-wider text-gray-500 mb-1"
-                                >
-                                    Date
-                                </p>
-
-                                <p class="text-lg font-semibold">
-                                    {{ show.show_time|date:"Y-m-d" }}
-                                    <br>
-                                    {{ show.show_time|timeuntil:from_date }} remaining
-                                </p>
-
-                            </div>
-
-
-                            <!-- Show Time -->
-                            <div class="mb-5">
-
-                                <p
-                                    class="text-xs uppercase
-                                           tracking-wider text-gray-500 mb-1"
-                                >
-                                    Show Time
-                                </p>
-
-                                <p class="text-3xl font-bold">
-                                    {{ show.show_time|time:"g:i A" }}
-                                </p>
-
-                            </div>
-
-
-                            <!-- Screen -->
-                            {% if show.screen %}
-
-                                <div
-                                    class="flex items-center
-                                           justify-between
-                                           border-t border-gray-800
-                                           pt-4 mb-5"
-                                >
-
-                                    <span class="text-gray-500">
-                                        Screen
-                                    </span>
-
-                                    <span
-                                        class="text-gray-300 font-medium"
-                                    >
-                                        {{ show.screen }}
-                                    </span>
-
-                                </div>
-
-                            {% endif %}
-
-
-                            <!-- Book Button -->
-                            <a
-                                href="{% url 'hall_seats' show.id %}"
-                                class="block w-full text-center
-                                       bg-red-600 hover:bg-red-700
-                                       active:bg-red-800
-                                       text-white font-semibold
-                                       py-3 px-4 rounded-lg
-                                       transition"
+                            <option value="">Choose Cinema</option>
+                            {% for cinema in cinemas %}
+                            <option value="{{cinema.id}}">{{ cinema.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                Book Tickets
-                            </a>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
 
                         </div>
-
-                    {% endfor %}
-
-                </div>
-
-            {% else %}
-
-                <!-- Empty Shows State -->
-                <div
-                    class="bg-gray-900 border border-gray-800
-                           rounded-xl p-12 text-center"
-                >
-
-                    <div class="text-5xl mb-4">
-                        🎟️
                     </div>
+                    
 
-                    <h3 class="text-xl font-semibold">
-                        No Shows Available
-                    </h3>
+                </form>
+            </div>
 
-                    <p class="text-gray-400 mt-2">
-                        There are currently no shows scheduled
-                        for this movie.
-                    </p>
-
-                </div>
-
-            {% endif %}
-
+           {% include "core/shows-partial.html" %}
         </section>
 {% endblock main_content %}
