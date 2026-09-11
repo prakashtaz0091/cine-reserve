@@ -8,4 +8,5 @@ urlpatterns = [
     path('hall/seats/', views.get_hall_seats, name="get_hall_seats"),
     path('show/setup/', views.show_setup, name="show_setup"),
     path('cinema/halls/multi/', views.get_cinema_halls_multiselect, name="get_cinema_halls_multiselect"),
+    path('reservations/qr/verify/', views.reservation_qr_verification, name="reservation_qr_verification"),
 ]

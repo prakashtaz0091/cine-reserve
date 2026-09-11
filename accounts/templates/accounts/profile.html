@@ -1,0 +1,77 @@
+{% extends "core/base.html" %}
+
+{% block main_content %}
+<div class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-2xl font-bold text-indigo-600">
+                {{ request.user.username|first|upper }}
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-900">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </h1>
+
+            <p class="mt-1 text-sm text-gray-500">
+                @{{ request.user.username }}
+            </p>
+        </div>
+
+        <!-- User Information -->
+        <div class="space-y-4">
+            <div class="rounded-lg bg-gray-50 p-4">
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Username
+                </p>
+                <p class="mt-1 text-gray-900">
+                    {{ request.user.username }}
+                </p>
+            </div>
+
+            <div class="rounded-lg bg-gray-50 p-4">
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Email
+                </p>
+                <p class="mt-1 text-gray-900">
+                    {{ request.user.email }}
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="rounded-lg bg-gray-50 p-4">
+                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        First Name
+                    </p>
+                    <p class="mt-1 text-gray-900">
+                        {{ request.user.first_name|default:"-" }}
+                    </p>
+                </div>
+
+                <div class="rounded-lg bg-gray-50 p-4">
+                    <p class="text-xs font-medium uppercase tracking-wide text-gray-500">
+                        Last Name
+                    </p>
+                    <p class="mt-1 text-gray-900">
+                        {{ request.user.last_name|default:"-" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout -->
+        <form method="post" action="{% url 'logout' %}" class="mt-8">
+            {% csrf_token %}
+            <button
+                type="submit"
+                class="w-full rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+                Logout
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+

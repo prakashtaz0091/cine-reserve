@@ -17,30 +17,6 @@ from django.template.loader import render_to_string
 from collections import OrderedDict
 
 
-
-
-def reservation_qr_verification(request):
-    if request.method == "POST":
-        master_id = request.POST.get('master_id')
-        try:
-            master = get_object_or_404(MasterReservation, pk=master_id)
-        except Exception:
-            return HttpResponse("<h1> Ticket doesn't exist </h1>")
-            
-        context = {
-            'movie_name': master.show.movie.name,
-            'show_time': master.show.show_time,
-            'seats': Seat.objects.filter(reservations__in=master.reservations.all())
-        }
-        if master:
-            return render(request, "core/ticket.html", context)
-        else:
-            return HttpResponse("<h1> Ticket doesn't exist </h1>")
-        
-        
-    return render(request, "core/qr-verification.html")
-
-
 @login_required
 def reservation_detail(request, pk):
     master = get_object_or_404(MasterReservation, pk=pk)
