@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from collections import OrderedDict
+from accounts.models import Profile
 
 
 @login_required
@@ -206,12 +207,16 @@ def register_view(request):
         
         if form.is_valid():
             data = form.cleaned_data
-            User.objects.create_user(
+            user = User.objects.create_user(
                 username=data.get('username'),
                 email=data.get('email'),
                 password=data.get('password'),
                 first_name=data.get('first_name'),
                 last_name=data.get('last_name')
+            )
+            
+            Profile.objects.create(
+                user=user
             )
             print("User creation successful")
             return redirect("login")
