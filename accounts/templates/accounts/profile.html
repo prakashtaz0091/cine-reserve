@@ -36,10 +36,7 @@
                 </p>
                 {% if not request.user.profile.is_verifed %}
                  
-                <form 
-                 hx-post="{% url 'verify_email_initiate' %}"
-                
-                >
+                <form method="POST" action="{% url 'verify_email_initiate' %}" >
                     {% csrf_token %}    
                     <button class="rounded-lg bg-green-600 px-2 font-small text-white transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                      
@@ -48,7 +45,7 @@
                 </form>
                 {% endif %}
                 <p class="mt-1 text-gray-900">
-                    {{ request.user.email }}
+                    {{ request.user.email }} {% if request.user.profile.is_verifed %} ✅ {% endif %}
                 </p>
             </div>
 
