@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -165,3 +166,19 @@ CACHES = {
         },
     },
 }
+
+
+LANGUAGE_CODE = "en"
+
+LANGUAGES = [
+    ("en", "English"),
+    ("ne", "नेपाली"),
+]
+
+USE_I18N = True
+
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
+
+
