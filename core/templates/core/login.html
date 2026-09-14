@@ -23,6 +23,18 @@
         <!-- Form -->
         <form method="POST" class="space-y-5">
 
+            <!-- Error Messages -->
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for message in messages %}
+                        <div class="bg-red-950 border border-red-800
+                                    text-red-400 px-4 py-3 rounded-lg text-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             {% csrf_token %}
 
             <!-- Username -->
@@ -67,18 +79,6 @@
                 >
             </div>
 
-            <!-- Error Messages -->
-            {% if messages %}
-                <div class="space-y-2">
-                    {% for message in messages %}
-                        <div class="bg-red-950 border border-red-800
-                                    text-red-400 px-4 py-3 rounded-lg text-sm">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
             {% if form.non_field_errors %}
                 <div class="bg-red-950 border border-red-800
                             text-red-400 px-4 py-3 rounded-lg text-sm">
@@ -107,6 +107,13 @@
             <a href="{% url 'register' %}"
                class="text-red-500 hover:text-red-400 font-medium">
                 Create an account
+            </a>
+        </p>
+        <p class="text-center text-gray-400 text-sm mt-2">
+            Forgot Password ?
+            <a href="{% url 'forgot_password_view' %}"
+               class="text-red-500 hover:text-red-400 font-medium">
+                Click to reset
             </a>
         </p>
 

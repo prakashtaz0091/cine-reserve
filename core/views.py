@@ -239,7 +239,9 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            print("Login sucessfull")
+            messages.success(request, "Login Successful")
             return redirect("movie_list")         
+        messages.error(request, "Invalid Credentials")
+        return redirect("login")
     
     return render(request, "core/login.html")

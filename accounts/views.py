@@ -2,13 +2,76 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth import logout
-from django.core.mail import send_mail
-from django.conf import settings
+from django.contrib.auth.models import User
 from django.urls import reverse
-from .tasks import send_email_verification_mail
+from .tasks import send_email_verification_mail, send_password_reset_mail
 from .models import OTP
 from django.contrib import messages
 from django_ratelimit.decorators import ratelimit
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+
+
+def password_reset_view(request):
+    if request.method == "POST":
+        print(request.POST)
+        otp_value = request.POST.get('otp')
+        new_password = request.POST.get('password') 
+        new_cpassword = request.POST.get('c-password') 
+        
+        # Check OTP validity
+        try:
+            otp = OTP.objects.get(value=otp_value)
+        except OTP.DoesNotExist():
+            messages.error(request, "Invalid OTP")
+            return redirect("password_reset_view")
+        except OTP.MultipleObjectsReturned():
+            messages.error(request, "Something went wrong with OTP, please request new otp")
+            return redirect("login")
+            
+        
+        # check if otp is expired
+        if otp.is_expired:
+            messages.error(request, "OTP has been expired.")
+            return redirect("login")
+        
+        # check if newpassword and confirm new password matches
+        if new_password != new_cpassword:
+            messages.error(request, "New password and Confirm New password doesn't match.")
+            return redirect("password_reset_view")
+        
+        # check listed password validation
+        try:
+            validate_password(new_password)
+            print("Password is valid")
+        except ValidationError as e:
+            str_error_message = "\n".join(e.messages)
+            messages.error(request, str_error_message)
+            return redirect("password_reset_view")
+        
+        otp.user.set_password(new_password)
+        otp.user.save()
+        messages.success(request, "Password reset successful, please continue via login")
+        
+        return redirect("login")
+    
+    return render(request, "accounts/reset-password.html")
+
+
+def forgot_password_view(request):
+    if request.method == "POST":
+        username_value = request.POST.get("username")
+        
+        url = request.build_absolute_uri(
+            reverse("password_reset_view")
+        )
+        send_password_reset_mail.delay(username=username_value, reset_url=url)
+        
+        messages.success(request, "If username exists, password reset link with OTP has been sent to respective email")
+        return redirect("movie_list")       
+    
+    
+    return render(request, "accounts/forgot-password.html")
 
 
 @login_required
