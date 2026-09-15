@@ -1,8 +1,14 @@
 {% extends "core/base.html" %}
+{% load static %}
+
+{% block extra_head %}
+
+    <link rel="stylesheet" href="{% static 'cine_admin/nepali_datepicker.min.css' %}" />
+    <script type="text/javascript" src="{% static 'cine_admin/nepali_datepicker.min.js' %}"></script>
+
+{% endblock extra_head %}
 
 {% block main_content %}
-<link href="https://nepalidatepicker.sajanmaharjan.com.np/v5/nepali.datepicker/css/nepali.datepicker.v5.0.6.min.css" rel="stylesheet" type="text/css"/>
-<script src="https://nepalidatepicker.sajanmaharjan.com.np/v5/nepali.datepicker/js/nepali.datepicker.v5.0.6.min.js" type="text/javascript"></script>
 
 <div class="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl">
