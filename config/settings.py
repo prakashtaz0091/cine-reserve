@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     "cine_admin",
     "accounts",
     "django_ratelimit",
+    'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

@@ -25,7 +25,7 @@ class Cinema(models.Model):
 
     
 class CinemaHall(models.Model):
-    cinema = models.ForeignKey(Cinema, on_delete=models.PROTECT)
+    cinema = models.ForeignKey(Cinema, on_delete=models.PROTECT, related_name="halls")
     name = models.CharField(max_length=100)
     row = models.PositiveIntegerField(null=True, default=0)
     col = models.PositiveIntegerField(null=True, default=0)
