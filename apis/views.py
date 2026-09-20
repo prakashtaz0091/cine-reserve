@@ -8,6 +8,12 @@ from rest_framework import permissions, status
 from django.db import IntegrityError, transaction
 from django.conf import settings
 from core.services import initiate_khalti_payment
+from .filters import MovieFilter
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.throttling import ScopedRateThrottle
+from django.core.cache import cache
+
 
 
 # @api_view(["GET"])
@@ -20,6 +26,46 @@ from core.services import initiate_khalti_payment
 class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieModelSerializer
     queryset = Movie.objects.all()
+    filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
+    filterset_class = MovieFilter
+    ordering_fields = ["name", "release_date"]
+    
+    def list(self, request, *args, **kwargs):
+        cache_key = f"movies:list:{request.get_full_path()}"
+
+        cached_response = cache.get(cache_key)
+
+        if cached_response is not None:
+            return Response(cached_response)
+
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            response = self.get_paginated_response(serializer.data)
+
+            cache.set(
+                cache_key,
+                response.data,
+                timeout=60,
+            )
+
+            return response
+
+        serializer = self.get_serializer(queryset, many=True)
+
+        response = Response(serializer.data)
+
+        cache.set(
+            cache_key,
+            response.data,
+            timeout=60,
+        )
+
+        return response    
+
 
       
 class CinemaViewSet(viewsets.ModelViewSet):
@@ -40,6 +86,8 @@ class CinemaHallViewSet(viewsets.ModelViewSet):
 
 class ProfileGetView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'profile'
     
     def get(self, request, format=None):
         profile, created = Profile.objects.get_or_create(user=request.user)
