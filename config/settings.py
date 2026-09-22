@@ -11,8 +11,10 @@ SECRET_KEY = "django-insecure-#krxjnq5t%pi8a0@hmipsu2qt^pjk)=#8(l$hr707dvsbj#s_4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    "www.prakashtajpuriya.com.np",
+    "prakashtajpuriya.com.np",
+]
 
 # Application definition
 
@@ -67,12 +69,24 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": "localhost",
+        "PORT": "3306",
     }
 }
+
+
 
 
 # Password validation
@@ -110,11 +124,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = "static/"
+STATIC_ROOT = "/home/prakasht/public_html/static/"
 
 
-MEDIA_ROOT = "media"
-MEDIA_URL = "media/"
+MEDIA_ROOT = "/home/prakasht/media/"
+MEDIA_URL = "media"
 
 RESERVATION_WINDOW_TIME = 5 # minutes
 
