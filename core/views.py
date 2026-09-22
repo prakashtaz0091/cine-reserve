@@ -10,7 +10,7 @@ from django.db import IntegrityError, transaction
 from django.contrib import messages
 from django.conf import settings
 from .services import initiate_khalti_payment, khalti_payment_lookup
-from .tasks import send_receipt_in_mail
+# from .tasks import send_receipt_in_mail
 from django.urls import reverse
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -53,12 +53,12 @@ def verify_reservation_payment(request):
         reservation_url = request.build_absolute_uri(
                 reverse("reservation_detail", kwargs={"pk": master.id})
             )
-        send_receipt_in_mail.delay(
-            reservation_detail_url=reservation_url,
-            master_id=str(master.id),
-            full_name=request.user.get_full_name(),
-            user_email=request.user.email,
-        )
+        # send_receipt_in_mail.delay(
+        #     reservation_detail_url=reservation_url,
+        #     master_id=str(master.id),
+        #     full_name=request.user.get_full_name(),
+        #     user_email=request.user.email,
+        # )
         return redirect("reservations")
     
     return redirect("movie_list")

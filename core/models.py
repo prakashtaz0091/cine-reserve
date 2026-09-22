@@ -1,4 +1,4 @@
-import uuid
+from uuid6 import uuid7
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -62,7 +62,7 @@ class Show(models.Model):
 class MasterReservation(models.Model):
     id =  models.UUIDField(
         primary_key=True,
-        default=uuid.uuid7,
+        default=uuid7,
         editable=False,
     )
     pidx = models.CharField(max_length=60, help_text="Payment intiate id from khalti", null=True)

@@ -4,10 +4,9 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.urls import reverse
-from .tasks import send_email_verification_mail, send_password_reset_mail
+# from .tasks import send_email_verification_mail, send_password_reset_mail
 from .models import OTP
 from django.contrib import messages
-from django_ratelimit.decorators import ratelimit
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
@@ -65,7 +64,7 @@ def forgot_password_view(request):
         url = request.build_absolute_uri(
             reverse("password_reset_view")
         )
-        send_password_reset_mail.delay(username=username_value, reset_url=url)
+        # send_password_reset_mail.delay(username=username_value, reset_url=url)
         
         messages.success(request, "If username exists, password reset link with OTP has been sent to respective email")
         return redirect("movie_list")       
@@ -97,7 +96,6 @@ def verify_email_otp(request):
 
 @login_required
 @require_POST
-@ratelimit(key="user", rate="1/2m", method="POST", block=False)
 def verify_email_initiate(request):
     
     if getattr(request, "limited", False):
@@ -113,7 +111,7 @@ def verify_email_initiate(request):
         reverse("verify_email_otp")
     )
     
-    send_email_verification_mail.delay(request.user.username, url)
+    # send_email_verification_mail.delay(request.user.username, url)
     
     return redirect("profile")
 
