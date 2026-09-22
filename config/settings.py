@@ -127,8 +127,8 @@ STATIC_URL = "static/"
 STATIC_ROOT = "/home/prakasht/public_html/static/"
 
 
-MEDIA_ROOT = "/home/prakasht/media/"
-MEDIA_URL = "media"
+MEDIA_ROOT = "media"
+MEDIA_URL = "/home/prakasht/media/"
 
 RESERVATION_WINDOW_TIME = 5 # minutes
 
